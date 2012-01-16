@@ -18,7 +18,7 @@ setup(
     #build_options = {}
 
     name='PySpend',
-    version='0.1',
+    version='0.1dev',
     author='Gary Kerr',
     author_email='gdrummondk@gmail.com',
     packages=['pyspend', 'pyspend.test'],
