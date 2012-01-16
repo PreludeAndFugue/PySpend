@@ -1,0 +1,3 @@
+include *.txt
+include *.pyw
+include *.json
