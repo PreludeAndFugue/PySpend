@@ -26,6 +26,7 @@ setup(
     license='LICENSE.txt',
     description='Record your expenditure',
     long_description=open('README.txt').read(),
+    requires=['wxPython'],
     classifiers=[
         'Environment :: Win32 (MS Windows)',
         'Environment :: X11 Applications',
