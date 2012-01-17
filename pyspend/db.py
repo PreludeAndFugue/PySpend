@@ -1,5 +1,5 @@
 #!/usr/local/bin/python
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 
 from __future__ import division
 import os
@@ -33,57 +33,62 @@ class PySpendDB(object):
         conn.execute(items)
         conn.commit()
         return conn
-        
+
     def close(self):
         self.conn.close()
-        
+
     def categories(self):
         """Categories generator."""
         sql = 'SELECT catID, name FROM categories ORDER BY name'
         return self._select(sql)
-        
+
+    def category_objects(self):
+        '''Categories generator which yields Category instances.'''
+        for catid, cat in self.categories():
+            yield Category(catid, cat)
+
     def new_category(self, name):
         sql = 'INSERT INTO categories (name) VALUES (?)'
         self._modify(sql, (name, ))
-        
+
     def category_exists(self, name):
         sql = 'SELECT name FROM categories WHERE name = ?'
         cur = self.conn.cursor()
         cur.execute(sql, (name, ))
         return cur.fetchone() is not None
-        
+
     def category_used(self, cat_id):
         '''Is the category being used in a items record.'''
         sql = 'SELECT COUNT(*) FROM items WHERE catID = ?'
         cur = self.conn.cursor()
         cur.execute(sql, (cat_id, ))
         return cur.fetchone()[0] != 0
-        
+
     def delete_category(self, cat_id):
         sql = 'DELETE FROM categories WHERE catID = ?'
         self._modify(sql, (cat_id, ))
-        
+
     def get_catid(self, category):
         sql = 'SELECT catID FROM categories WHERE name = ?'
         cur = self.conn.cursor()
         cur.execute(sql, (category, ))
         return cur.fetchone()[0]
-        
+
     def day_items(self, purchase_date):
         sql = '''SELECT itemID, categories.name, items.name, costp FROM items
                  LEFT JOIN categories ON items.catID = categories.catID
                  WHERE purchase_date = ?'''
         return self._select(sql, (purchase_date, ))
-        
+
     def new_item(self, cat_id, name, cost, date):
         sql = '''INSERT INTO items (catID, name, cost, costp, purchase_date)
                  VALUES (?, ?, ?, ?, ?)'''
         self._modify(sql, (cat_id, name, cost/100, cost, date))
-        
+
     def delete_item(self, item_id):
         sql = 'DELETE FROM items WHERE itemID = ?'
         self._modify(sql, (item_id, ))
-            
+
     def year_months(self):
         """Generator for year-month data in format '2010-11', for all months
         in the database."""
@@ -92,7 +97,7 @@ class PySpendDB(object):
                  ORDER BY year_month ASC"""
         for year_month in self.conn.execute(sql):
             yield year_month[0]
-            
+
     def new_record(self, data):
         """Add a new record to the database.
             data: a tuple (category, name, costp, purchase_date)"""
@@ -103,21 +108,21 @@ class PySpendDB(object):
                 VALUES (?, ?, ?, ?, ?);"""
         self.conn.execute(sql, insert_data)
         self.conn.commit()
-        
+
     def _select(self, sql, params=()):
         for row in self.conn.execute(sql, params):
             yield row
-            
+
     def _modify(self, sql, params=()):
         self.conn.execute(sql, params)
         self.conn.commit()
-        
+
 class Category(object):
     '''Category object to wrap a row in the categories table.'''
     def __init__(self, id, name):
         self.id = id
         self.name = name
-        
+
 class Item(object):
     '''Item object to wrap a row in the items table.'''
     def __init__(self, id, catid, name, cost, costp, purchase_date):

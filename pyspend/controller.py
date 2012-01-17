@@ -95,11 +95,11 @@ class PySpendController(gui.PySpendGUI):
 
                 self.config['DB'] = self.db_path
             dlg.Destroy()
-                
+
             if not self.db_path:
                 self.quit_no_database()
                 self.Destroy()
-                
+
             self.config['DB'] = self.db_path
 
     def open_db(self):
