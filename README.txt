@@ -1,10 +1,17 @@
-===========
-pyspend 0.1
+PySpend 0.1
 ===========
 
-PySpend is a simple package for recording your expenditure.
+PySpend is a simple application for recording your expenditure. Items are
+recorded in a daily diary
 
-Dependencies: pyspend requires the following third party Python modules to run.
+How to use
+----------
+There is a file run_pyspend.pyw in the installation folder. Run this file
+to start the application.
+
+Requirements
+------------
+PySpend requires the following third party Python modules to be installed.
 
 - wx
 - ObjectListView
