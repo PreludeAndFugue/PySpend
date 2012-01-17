@@ -9,6 +9,7 @@
 
 import wx
 import wx.xrc
+from ObjectListView import ObjectListView
 
 ###########################################################################
 ## Class PySpendGUI
@@ -87,6 +88,9 @@ class PySpendGUI ( wx.Frame ):
 		self.item_list = wx.ListCtrl( self.item_panel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LC_REPORT )
 		bSizer7.Add( self.item_list, 1, wx.ALL|wx.EXPAND, 3 )
 		
+		self.item_list2 = ObjectListView(self.item_panel,  sortable=False, style=wx.LC_REPORT, useAlternateBackColors=False)
+		bSizer7.Add( self.item_list2, 1, wx.ALL|wx.EXPAND, 3 )
+		
 		bSizer11 = wx.BoxSizer( wx.HORIZONTAL )
 		
 		self.m_staticText10 = wx.StaticText( self.item_panel, wx.ID_ANY, u"Total cost", wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -129,6 +133,9 @@ class PySpendGUI ( wx.Frame ):
 		
 		self.cat_list = wx.ListCtrl( self.cat_panel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LC_REPORT )
 		bSizer5.Add( self.cat_list, 1, wx.ALL|wx.EXPAND, 3 )
+		
+		self.cat_list2 = ObjectListView(self.cat_panel, sortable=False, style=wx.LC_REPORT, useAlternateBackColors=False)
+		bSizer5.Add( self.cat_list2, 1, wx.ALL|wx.EXPAND, 3 )
 		
 		self.cat_panel.SetSizer( bSizer5 )
 		self.cat_panel.Layout()

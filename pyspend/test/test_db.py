@@ -51,7 +51,7 @@ def create_db():
     conn.executemany(INSERT_ITEMS, ITEMS)
     conn.commit()
     conn.close()
-    
+
 class TestTemplate(unittest.TestCase):
     def setUp(self):
         self.conn = db.PySpendDB(DB)
@@ -85,13 +85,13 @@ class TestDB(TestTemplate):
         for (id, name), cat_obj in zip(SORTED_CATS, self.conn.category_objects()):
             self.assertEqual(id, cat_obj.id)
             self.assertEqual(name, cat_obj.name)
-        
+
 class TestDelete(TestTemplate):
     def test_delete_category(self):
         # delete (4, 'Misc') category
         self.conn.delete_category(4)
         self.assertFalse(self.conn.category_exists('Misc'))
-    
+
 if __name__ == '__main__':
     create_db()
     tests = (TestDB, TestDelete)

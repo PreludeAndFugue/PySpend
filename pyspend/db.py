@@ -75,10 +75,17 @@ class PySpendDB(object):
         return cur.fetchone()[0]
 
     def day_items(self, purchase_date):
-        sql = '''SELECT itemID, categories.name, items.name, costp FROM items
+        sql = '''SELECT itemID, items.catID, categories.name, items.name, cost,
+                 costp
+                 FROM items
                  LEFT JOIN categories ON items.catID = categories.catID
                  WHERE purchase_date = ?'''
         return self._select(sql, (purchase_date, ))
+
+    def day_item_objects(self, purchase_date):
+        for row in self.day_items(purchase_date):
+            data = row + (purchase_date, )
+            yield Item(*data)
 
     def new_item(self, cat_id, name, cost, date):
         sql = '''INSERT INTO items (catID, name, cost, costp, purchase_date)
@@ -125,9 +132,10 @@ class Category(object):
 
 class Item(object):
     '''Item object to wrap a row in the items table.'''
-    def __init__(self, id, catid, name, cost, costp, purchase_date):
+    def __init__(self, id, catid, category, name, cost, costp, purchase_date):
         self.id = id
         self.catid = catid
+        self.category = category
         self.name = name
         self.cost = cost
         self.costp = costp
