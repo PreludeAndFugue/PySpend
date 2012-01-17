@@ -34,6 +34,9 @@ class PySpendDB(object):
         conn.commit()
         return conn
         
+    def close(self):
+        self.conn.close()
+        
     def categories(self):
         """Categories generator."""
         sql = 'SELECT catID, name FROM categories ORDER BY name'
@@ -108,3 +111,19 @@ class PySpendDB(object):
     def _modify(self, sql, params=()):
         self.conn.execute(sql, params)
         self.conn.commit()
+        
+class Category(object):
+    '''Category object to wrap a row in the categories table.'''
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+        
+class Item(object):
+    '''Item object to wrap a row in the items table.'''
+    def __init__(self, id, catid, name, cost, costp, purchase_date):
+        self.id = id
+        self.catid = catid
+        self.name = name
+        self.cost = cost
+        self.costp = costp
+        self.purchase_date = purchase_date
