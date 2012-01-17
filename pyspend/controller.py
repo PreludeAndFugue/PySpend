@@ -23,26 +23,26 @@ def run():
 class PySpend(wx.App):
     def OnInit(self):
         self.config = self._read_config()
-        
+
         self.frame = PySpendController(config=self.config, parent=None)
         self.frame.Show()
         self.SetTopWindow(self.frame)
 
         return True
-        
+
     def OnExit(self):
         self._write_config()
-        
+
     def _read_config(self):
         '''Read the config file.'''
         config = json.load(open(self._config_path(), 'r'))
         return config
-        
+
     def _write_config(self):
         '''Write changes to the config file on exit.'''
         with open(self._config_path(), 'w') as f:
             json.dump(self.config, f, indent=4)
-            
+
     def _config_path(self):
         path = os.path.dirname(__file__)
         return os.path.join(path, CONFIG)
@@ -50,13 +50,13 @@ class PySpend(wx.App):
 class PySpendController(gui.PySpendGUI):
     def __init__(self, config, *args, **kwargs):
         super(PySpendController, self).__init__(*args, **kwargs)
-        
+
         # check database
         self.config = config
         self.db_path = config['DB']
         self.check_db()
         self.db = db.connect(self.db_path)
-        
+
         self._bind_events()
 
         # initialise some widgets
@@ -78,10 +78,10 @@ class PySpendController(gui.PySpendGUI):
 
     ############################################################################
     # open and save database files
-    
+
     def check_db(self):
         '''Check that the db path is an sqlite file.'''
-        if not os.path.exists(self.db_path):
+        if not self.db_path or not os.path.exists(self.db_path):
             msg = 'No database file. Please open an existing file, or create a new one.'
             caption = 'No Database'
             choices = ['Open', 'Create']
@@ -92,17 +92,34 @@ class PySpendController(gui.PySpendGUI):
                     self.db_path = self.open_db()
                 else:
                     self.db_path = self.save_db()
+
                 self.config['DB'] = self.db_path
-    
+            dlg.Destroy()
+                
+            if not self.db_path:
+                self.quit_no_database()
+                self.Destroy()
+                
+            self.config['DB'] = self.db_path
+
     def open_db(self):
         '''Open a database file.'''
         return self._file_dialog(OPEN)
-        
+
     def save_db(self):
         '''Save a database file to a new location or create a new file when
         the file doesn't exist.'''
         return self._file_dialog(SAVE)
-        
+
+    def quit_no_database(self):
+        '''Inform the user that no database was selected, then quit app.'''
+        msg = 'Quitting application because no database was selected.'
+        caption = 'Exit, no database'
+        style = wx.OK | wx.ICON_EXCLAMATION
+        dlg = wx.MessageDialog(self, msg, caption, style)
+        dlg.ShowModal()
+        dlg.Destroy()
+
     def _file_dialog(self, type_):
         if type_ == OPEN:
             style = wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
@@ -112,13 +129,11 @@ class PySpendController(gui.PySpendGUI):
             msg = "Save or create a database"
         wildcard = "Database Files (*.sqlite)|*.sqlite"
         dlg = wx.FileDialog(self, message=msg, wildcard=wildcard, style=style)
-        if dlg.ShowModal() == wx.ID_OK:
-            print 'ok'
-            return dlg.GetPath()
-        else:
-            print 'cancel'
+        dlg.ShowModal()
+        new_path = dlg.GetPath()
         dlg.Destroy()
-        
+        return new_path
+
 
     ############################################################################
     # event handlers
@@ -158,7 +173,7 @@ class PySpendController(gui.PySpendGUI):
         # set the focus back to the item text box
         self.name.SetFocus()
         self.name.SetSelection(-1, -1)
-        
+
     def delete_popup(self, event):
         '''Show the delete pop-up menu on right click on a list control.'''
         self.delete_list = event.GetEventObject()
@@ -166,7 +181,7 @@ class PySpendController(gui.PySpendGUI):
         item_id = self.delete_list.GetItem(selected_item, 0).GetText()
         self.delete_item_id = int(item_id)
         self.PopupMenu(self.menu_delete)
-        
+
     def delete_item(self, event):
         if self.delete_list is self.cat_list:
             # try to delete category
