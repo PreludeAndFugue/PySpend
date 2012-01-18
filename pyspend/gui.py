@@ -85,11 +85,8 @@ class PySpendGUI ( wx.Frame ):
 		
 		bSizer7.Add( fgSizer3, 0, wx.EXPAND, 3 )
 		
-		self.item_list = wx.ListCtrl( self.item_panel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LC_REPORT )
+		self.item_list = ObjectListView(self.item_panel,  sortable=False, style=wx.LC_REPORT, useAlternateBackColors=False)
 		bSizer7.Add( self.item_list, 1, wx.ALL|wx.EXPAND, 3 )
-		
-		self.item_list2 = ObjectListView(self.item_panel,  sortable=False, style=wx.LC_REPORT, useAlternateBackColors=False)
-		bSizer7.Add( self.item_list2, 1, wx.ALL|wx.EXPAND, 3 )
 		
 		bSizer11 = wx.BoxSizer( wx.HORIZONTAL )
 		
@@ -131,11 +128,8 @@ class PySpendGUI ( wx.Frame ):
 		bSizer6.Fit( self.m_panel6 )
 		bSizer5.Add( self.m_panel6, 0, wx.EXPAND |wx.ALL, 3 )
 		
-		self.cat_list = wx.ListCtrl( self.cat_panel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LC_REPORT )
+		self.cat_list = ObjectListView(self.cat_panel, sortable=False, style=wx.LC_REPORT, useAlternateBackColors=False)
 		bSizer5.Add( self.cat_list, 1, wx.ALL|wx.EXPAND, 3 )
-		
-		self.cat_list2 = ObjectListView(self.cat_panel, sortable=False, style=wx.LC_REPORT, useAlternateBackColors=False)
-		bSizer5.Add( self.cat_list2, 1, wx.ALL|wx.EXPAND, 3 )
 		
 		self.cat_panel.SetSizer( bSizer5 )
 		self.cat_panel.Layout()

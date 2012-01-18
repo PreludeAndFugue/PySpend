@@ -62,16 +62,12 @@ class PySpendController(gui.PySpendGUI):
 
         # initialise some widgets
         self.config_cat_list()
-        self.config_cat_list2()
         self.refresh_cat_list()
-        self.refresh_cat_list2()
 
         self.refresh_category()
 
         self.config_item_list()
-        self.config_item_list2()
         self.refresh_item_list()
-        self.refresh_item_list2()
 
     def _bind_events(self):
         self.date_picker.Bind(wx.EVT_DATE_CHANGED, self.pick_date)
@@ -147,7 +143,6 @@ class PySpendController(gui.PySpendGUI):
 
     def pick_date(self, event):
         self.refresh_item_list()
-        self.refresh_item_list2()
 
     def date_next(self, event):
         self.day_inc(1)
@@ -160,7 +155,6 @@ class PySpendController(gui.PySpendGUI):
         new_day = day + wx.DateSpan(0, 0, 0, inc)
         self.date_picker.SetValue(new_day)
         self.refresh_item_list()
-        self.refresh_item_list2()
 
     def new_item(self, event):
         cat = self.category.GetValue()
@@ -173,12 +167,10 @@ class PySpendController(gui.PySpendGUI):
 
         cat_id = self.db.get_catid(cat)
         date = self.date_picker.GetValue().FormatISODate()
-        #print(cat_id, cat, item, amount, date)
 
         self.db.new_item(cat_id, item, amount, date)
 
         self.refresh_item_list()
-        self.refresh_item_list2()
 
         # set the focus back to the item text box
         self.name.SetFocus()
@@ -187,23 +179,20 @@ class PySpendController(gui.PySpendGUI):
     def delete_popup(self, event):
         '''Show the delete pop-up menu on right click on a list control.'''
         self.delete_list = event.GetEventObject()
-        selected_item = self.delete_list.GetFirstSelected()
-        item_id = self.delete_list.GetItem(selected_item, 0).GetText()
-        self.delete_item_id = int(item_id)
         self.PopupMenu(self.menu_delete)
 
     def delete_item(self, event):
+        item = self.delete_list.GetSelectedObject()
         if self.delete_list is self.cat_list:
             # try to delete category
-            if not self.db.category_used(self.delete_item_id):
-                self.db.delete_category(self.delete_item_id)
+            if not self.db.category_used(item.id):
+                self.db.delete_category(item.id)
                 self.refresh_cat_list()
                 self.refresh_category()
         else:
             # delete outgoings item
-            self.db.delete_item(self.delete_item_id)
+            self.db.delete_item(item.id)
             self.refresh_item_list()
-            self.refresh_item_list2()
 
     def validate_cost(self, event):
         '''Cost should be an integer.'''
@@ -229,77 +218,45 @@ class PySpendController(gui.PySpendGUI):
         else:
             self.db.new_category(category)
             self.refresh_cat_list()
-            self.refresh_cat_list2()
             self.refresh_category()
 
     ############################################################################
     # category tab
 
     def config_cat_list(self):
-        '''Initial configuration'''
-        self.cat_list.InsertColumn(0, 'cat_id', width=0)
-        self.cat_list.InsertColumn(1, 'Category', width=450)
-
-    def refresh_cat_list(self):
-        '''Refresh the cat list whenever change is made to categories.'''
-        self.cat_list.DeleteAllItems()
-        for row in self.db.categories():
-            self.cat_list.Append(row)
-
-    def config_cat_list2(self):
         '''Initial configuration of the category list.'''
-        self.cat_list2.SetColumns([
-            ColumnDefn('Category', 'left', 200, 'name',
+        self.cat_list.SetColumns([
+            ColumnDefn('Category', 'left', 400, 'name',
                 isSpaceFilling=True)
         ])
 
-    def refresh_cat_list2(self):
+    def refresh_cat_list(self):
         '''Refresh the cat list whenever a change is made to the categories.'''
-        self.cat_list2.DeleteAllItems()
-        self.cat_list2.SetObjects(list(self.db.category_objects()))
+        self.cat_list.DeleteAllItems()
+        self.cat_list.SetObjects(list(self.db.category_objects()))
 
     ############################################################################
     # item tab
 
     def config_item_list(self):
         '''Initial configuration of item list.'''
-        l = wx.LIST_FORMAT_LEFT
-        r = wx.LIST_FORMAT_RIGHT
-        columns = [('itemid', 0, l), ('Category', 130, l), ('Item', 340, l),
-                   (u'Cost (£)', 70, r)]
-        for i, (col, width, format) in enumerate(columns):
-            self.item_list.InsertColumn(i, col, format=format, width=width)
-
-    def config_item_list2(self):
-        '''Initial configuration of item list.'''
-        self.item_list2.SetColumns([
+        self.item_list.SetColumns([
             ColumnDefn('Category', 'left', 200, 'category', isSpaceFilling=True),
-            ColumnDefn('Item', 'left', 250, 'name', isSpaceFilling=True),
+            ColumnDefn('Item', 'left', 300, 'name', isSpaceFilling=True),
             ColumnDefn(u'Cost (£)', 'right', 70, 'cost',
                 stringConverter='%0.2f')
         ])
 
     def refresh_item_list(self):
-        date_iso = self.date_picker.GetValue().FormatISODate()
-        self.item_list.DeleteAllItems()
-        total_cost = 0
-        fmt = u'£{:0.2f}'.format
-        for row in self.db.day_items(date_iso):
-            itemid = row[0]
-            category = row[2]
-            name = row[3]
-            cost = row[-1]
-            total_cost += cost
-            cost /= 100
-            self.item_list.Append([itemid, category, name, fmt(cost)])
-        # update total in footer
-        self.total_cost.SetLabel(fmt(total_cost/100))
-
-    def refresh_item_list2(self):
         '''Update the contents of the item list.'''
         date_iso = self.date_picker.GetValue().FormatISODate()
-        self.item_list2.DeleteAllItems()
-        self.item_list2.SetObjects(list(self.db.day_item_objects(date_iso)))
+        self.item_list.DeleteAllItems()
+        items = list(self.db.day_item_objects(date_iso))
+        self.item_list.SetObjects(items)
+        # update the total in footer
+        fmt = u'£{:0.2f}'.format
+        total_cost = sum(item.cost for item in items)
+        self.total_cost.SetLabel(fmt(total_cost))
 
     def refresh_category(self):
         '''The category combo box needs refreshing.'''

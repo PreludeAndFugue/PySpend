@@ -22,5 +22,6 @@ Requirements
 ------------
 PySpend requires the following third party Python modules to be installed.
 
+- Python 2.7
 - wxPython
 - ObjectListView

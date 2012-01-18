@@ -130,6 +130,9 @@ class Category(object):
         self.id = id
         self.name = name
 
+    def __repr__(self):
+        return 'Category({}, {})'.format(self.id, self.name)
+
 class Item(object):
     '''Item object to wrap a row in the items table.'''
     def __init__(self, id, catid, category, name, cost, costp, purchase_date):
